@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" href="favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <meta
+            name="description"
+            content="Azure SignalR web page"
+        />
+
+        <title>Azure IoT 动手实验营</title>
+    </head>
+    <body>
+        <h2>Azure IoT 设备遥测</h2>
+        <div id="messages"></div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
+        <script>
+            let messages = document.querySelector('#messages');
+            const apiBaseUrl = window.location.origin;
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(apiBaseUrl + '/api')
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+                connection.on('newMessage', (message) => {
+                    document.getElementById("messages").innerHTML = message;
+                });
+        
+                connection.start()
+                .catch(console.error);
+        </script>
+    </body>
+</html>
