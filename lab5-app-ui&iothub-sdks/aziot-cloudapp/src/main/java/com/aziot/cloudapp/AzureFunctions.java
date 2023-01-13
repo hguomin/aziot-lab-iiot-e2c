@@ -23,11 +23,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.function.adapter.azure.FunctionInvoker;
 /**
 * Azure Functions with HTTP Trigger.
 */
 public class AzureFunctions extends FunctionInvoker<String, String> {
+
+    //-----Lab6: Azure IoT Hub SDKs integration--------//
+    private final AzIotHubService iotHubService;
+    @Autowired
+    public AzureFunctions(AzIotHubService iothubService)
+    {
+        this.iotHubService = iothubService;
+    }
+
     /**
     * This function listens at endpoint "/api/HttpExample". Two ways to invoke it using "curl" command in bash:
     * 1. curl -d "HTTP Body" {your host}/api/HttpExample
@@ -46,7 +56,7 @@ public class AzureFunctions extends FunctionInvoker<String, String> {
         // Parse query parameter
         final String query = request.getQueryParameters().get("name");
         final String name = request.getBody().orElse(query);
-
+        iotHubService.getClass();
         if (name == null) {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please pass a name on the query string or in the request body").build();
         } else {

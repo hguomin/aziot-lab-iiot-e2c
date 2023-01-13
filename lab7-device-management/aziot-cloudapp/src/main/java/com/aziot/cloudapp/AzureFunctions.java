@@ -1,5 +1,8 @@
 package com.aziot.cloudapp;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
@@ -23,11 +26,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.function.adapter.azure.FunctionInvoker;
 /**
 * Azure Functions with HTTP Trigger.
 */
 public class AzureFunctions extends FunctionInvoker<String, String> {
+
     /**
     * This function listens at endpoint "/api/HttpExample". Two ways to invoke it using "curl" command in bash:
     * 1. curl -d "HTTP Body" {your host}/api/HttpExample
@@ -46,7 +51,6 @@ public class AzureFunctions extends FunctionInvoker<String, String> {
         // Parse query parameter
         final String query = request.getQueryParameters().get("name");
         final String name = request.getBody().orElse(query);
-
         if (name == null) {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please pass a name on the query string or in the request body").build();
         } else {
@@ -73,6 +77,7 @@ public class AzureFunctions extends FunctionInvoker<String, String> {
     /**
      * This function will be invoked when an event is received from Event Hub.
      */
+    /*
     @FunctionName("ReceiveIoTHubMessages")
     @SignalROutput(name = "$return", hubName = "aziothub")
     public SignalRMessage receiveIoTHubMessages(
@@ -83,6 +88,7 @@ public class AzureFunctions extends FunctionInvoker<String, String> {
         context.getLogger().info("Message: " + message);
         return new SignalRMessage("newMessage", message);
     }
+    */
 
     @FunctionName("negotiate")
     public SignalRConnectionInfo negotiate(
@@ -95,5 +101,35 @@ public class AzureFunctions extends FunctionInvoker<String, String> {
                 hubName = "aziothub") SignalRConnectionInfo connectionInfo) {
 
         return connectionInfo;
+    }
+
+    //---------Lab7: Get IoT edge devices---------//
+    @FunctionName("EdgeDevices")
+    public HttpResponseMessage getIoTEdgeDevices(
+            @HttpTrigger(
+                name = "req",
+                methods = {HttpMethod.GET},
+                authLevel = AuthorizationLevel.ANONYMOUS)
+                HttpRequestMessage<Optional<String>> request,
+            final ExecutionContext context) {
+        context.getLogger().info("Get IoT edge devices.");
+
+        return request.createResponseBuilder(HttpStatus.OK).body(handleRequest(context)).build();
+        
+    }
+
+    //---------Lab7: Deploy IoT edge module--------//
+    @FunctionName("deployIoTEdgeModule")
+    public HttpResponseMessage deployIoTEdgeModule(
+            @HttpTrigger(
+                name = "req",
+                methods = {HttpMethod.GET, HttpMethod.POST},
+                authLevel = AuthorizationLevel.ANONYMOUS)
+                HttpRequestMessage<Optional<String>> request,
+            final ExecutionContext context) {
+        context.getLogger().info("Deploy IoT edge modules.");
+
+        return request.createResponseBuilder(HttpStatus.OK).body(handleRequest(request.getBody().get(), context)).build();
+        
     }
 }

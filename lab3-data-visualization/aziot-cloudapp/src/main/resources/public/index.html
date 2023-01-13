@@ -11,13 +11,88 @@
         />
 
         <title>Azure IoT 动手实验营</title>
+
+        <style type="text/css">
+            /* AXES */
+            /* ticks */
+            .axis line {
+                stroke: #706f6f;
+                stroke-width: 0.5;
+                shape-rendering: crispEdges;
+            }
+        
+            /* axis contour */
+            .axis path {
+                stroke: #706f6f;
+                stroke-width: 0.7;
+                shape-rendering: crispEdges;
+            }
+        
+            /* axis text */
+            .axis text {
+                fill: #2b2929;
+                font-family: Georgia;
+                font-size: 120%;
+            }
+
+            /* LINE CHART */
+            path.line-0 {
+                fill: none;
+                stroke: #ed3700;
+            }
+
+            path.line-1 {
+                fill: none;
+                stroke: #2b2929;
+                stroke-dasharray: 2;
+            }
+
+            path.line-2 {
+                fill: none;
+                stroke: #9c9c9c;
+                stroke-dasharray: 6;
+            }
+
+            .serie_label {
+                fill: #2b2929;
+                font-family: Georgia;
+                font-size: 80%;
+            }
+
+            /* TOOLTIP */
+            .tooltip {
+                fill: #2b2929;
+                font-family: Georgia;
+                font-size: 150%;
+            }
+
+            /* POINTS */
+            .point {
+                stroke: none;
+                fill: #9c9c9c;
+            }
+        </style>
     </head>
     <body>
         <h2>Azure IoT 设备遥测</h2>
+
+        <!--图表容器-->
+        <div id="charts">
+            
+        </div>
+
+        <div>
+            <button id="testBtn">Data Test</button>
+        </div>
+
         <div id="messages"></div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
         <script>
+            /*
+            
             let messages = document.querySelector('#messages');
             const apiBaseUrl = window.location.origin;
             const connection = new signalR.HubConnectionBuilder()
@@ -30,6 +105,291 @@
         
                 connection.start()
                 .catch(console.error);
+            */
+            
+            let chartContainer = document.querySelector("#charts");
+            let chart = echarts.init(chartContainer, 'dark', {
+                width: 600,
+                height: 400
+            })
+            
+            const randomMessage = () => {
+                return {
+                    timestamp: new Date(),
+                    deviceId: 'my-device',
+                    temperature: 20 + Math.random() * 20,
+                    humidity: 30 + Math.random() * 20
+                };
+            };
+
+            let data = [];
+
+            const option = {
+                title: {
+                    text: ""
+                },
+                legend: {},
+                tooltip: {},
+                dataset: {
+                    //dimensions: ['timestamp', 'deviceId', 'temperature', 'humidity'],
+                    source: data
+                },
+                xAxis: {
+                    type: 'time'
+                },
+                yAxis: {
+                    type: 'value',
+                    boundaryGap: [0, '100%'],
+                    splitLine: {
+                        show: false
+                    }
+                },
+                series: [{
+                        name: 'Temperature',
+                        type: 'line',
+                        smooth: true,
+                        encode: {
+                            x: 'timestamp',
+                            y: 'temperature'
+                        }
+                    },
+                    {
+                        name: 'Humidity',
+                        type: 'line',
+                        smooth: true,
+                        encode: {
+                            x: 'timestamp',
+                            y: 'humidity'
+                        }
+                    },
+                ]
+            }
+
+            chart.setOption(option);
+
+            const updateChart = (msg) => {
+                if(data.length > 50) {
+                    for(let i = 0; i < 25; ++i) {
+                        data.shift();
+                    }
+                }
+                
+                data.push(msg);
+
+                chart.setOption({
+                    dataset: {
+                        source: data
+                    }
+                });
+
+            };
+
+            /*
+            setInterval(() => {
+                if(data.length > 50) {
+                    for(let i = 0; i < 25; ++i) {
+                        data.shift();
+                    }
+                }
+                
+                data.push(randomMessage());
+
+                chart.setOption({
+                    dataset: {
+                        source: data
+                    }
+                });
+
+            }, 2000);
+            */
+
+            const apiBaseUrl = window.location.origin;
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(apiBaseUrl + '/api')
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+                connection.on('newMessage', (message) => {
+                    //document.getElementById("messages").innerHTML = message;
+                    let msg = JSON.parse(message);
+                    updateChart(msg);
+                });
+        
+                connection.start().catch(console.error);
+
+            ////////////////D3.js//////////////////////////
+            /*
+            //------------1. 准备工作-------------//
+            //------------SVG-------------//
+            const width = 500, height = 300, margin = 5, padding = 5, adj = 30;
+            const svg = d3.select('#charts').append('svg')
+                        //.attr("preserveAspectRatio", "xMinYMin meet")
+                        .attr("viewBox", "-" + adj + " -" + adj + " " + (width + adj *3) + " " + (height + adj*3))
+                        .style("padding", padding)
+                        .style("margin", margin)
+                        .classed("svg-content", true);
+            
+            //------------Data-------------//
+            const timeConv = d3.timeParse("%d-%b-%Y");
+            const dataset = d3.csv("data.csv");
+            console.log(dataset);
+            dataset.then(data => {
+                const slices = data.columns.slice(1).map(id => {
+                    return {
+                        id: id,
+                        values: data.map(dat => {
+                            return {
+                                date: timeConv(dat.date),
+                                measurement: +dat[id] //convert value to int
+                            }
+                        })
+                    }
+                });
+                console.log('data:', data);
+                console.log('columns:', data.columns);
+                console.log('columns except date:', data.columns.slice(1));
+                console.log('Slices:', slices);
+
+                //------------Scales-------------//
+                const xScale = d3.scaleTime().range([0, width]);
+                const yScale = d3.scaleLinear().rangeRound([height, 0]);
+
+                xScale.domain(d3.extent(data, function (d) {
+                    return timeConv(d.date)
+                }));
+                yScale.domain([(0), d3.max(slices, function (c) {
+                        return d3.max(c.values, function (d) {
+                            return d.measurement + 4;
+                        });
+                    })
+                ]);
+                
+                //------------Axis-------------//
+                const yaxis = d3.axisLeft()
+                    .ticks((slices[0].values).length)
+                    .scale(yScale);
+
+                const xaxis = d3.axisBottom()
+                    .ticks(d3.timeDay.every(1))
+                    .tickFormat(d3.timeFormat('%b %d'))
+                    .scale(xScale);
+
+                //------------Lines-------------//
+                const line = d3.line()
+                    .x(d => xScale(d.date))
+                    .y(d => yScale(d.measurement));
+
+                let id = 0;
+                const ids = () => "line-"+id++;
+                
+                //------------Tooltips-------------//
+                const tooltip = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0)
+                    .style("position", "absolute");
+
+
+                //------------2. 绘图-------------//
+                //------------Axis-------------//
+                svg.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', "translate(0," + height + ")")
+                    .call(xaxis);
+
+                svg.append('g')
+                    .attr('class', 'axis')
+                    .call(yaxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("dy", ".75em")
+                    .attr("y", 6)
+                    .style("text-anchor", "end")
+                    .text("Frequency");
+                
+                //------------Lines-------------//
+
+                const lines = svg.selectAll('lines')
+                    .data(slices)
+                    .enter()
+                    .append('g');
+
+                lines.append('path')
+                    .attr('class', ids)
+                    .attr('d', d => line(d.values));
+
+                lines.append("text")
+                    .attr("class", "serie_label")
+                    .datum(function (d) {
+                        return {
+                            id: d.id,
+                            value: d.values[d.values.length - 1]
+                        };
+                    })
+                    .attr("transform", function (d) {
+                        return "translate(" + (xScale(d.value.date) + 10)
+                            + "," + (yScale(d.value.measurement) + 5) + ")";
+                    })
+                    .attr("x", 5)
+                    .text(d => ("Serie ") + d.id);
+
+                lines.selectAll("points")
+                    .data(d => d.values)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", d => xScale(d.date))
+                    .attr("cy", d => yScale(d.measurement))
+                    .attr("r", 1)
+                    .attr("class", "point")
+                    .style("opacity", 1);
+
+                //------------Events-------------//
+                lines.selectAll("circles")
+                    .data(d => d.values)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", d => xScale(d.date))
+                    .attr("cy", d => yScale(d.measurement))
+                    .attr('r', 10)
+                    .style("opacity", 0)
+                    .on('mouseover', function (d) {
+                        tooltip.transition()
+                            .delay(30)
+                            .duration(200)
+                            .style("opacity", 1);
+
+                        tooltip.html(d.measurement)
+                            .style("left", (d3.event.pageX + 25) + "px")
+                            .style("top", (d3.event.pageY) + "px")
+       
+                        const selection = d3.select(this).raise();
+                        selection
+                            .transition()
+                            .delay("20")
+                            .duration("200")
+                            .attr("r", 6)
+                            .style("opacity", 1)
+                            .style("fill", "#ed3700");
+                    })
+
+                    .on("mouseout", function (d) {
+                        tooltip.transition()
+                            .duration(100)
+                            .style("opacity", 0);
+                            const selection = d3.select(this);
+                            selection.transition()
+                                .delay("20")
+                                .duration("200")
+                                .attr("r", 10)
+                                .style("opacity", 0);
+                    });
+            });
+
+            let btn = document.querySelector('#testBtn');
+            if (null != btn) {
+                btn.addEventListener('click', (e) => {
+                    console.log(e);
+                })
+            }
+            */
         </script>
     </body>
 </html>
