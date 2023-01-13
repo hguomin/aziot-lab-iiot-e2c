@@ -12,7 +12,7 @@ from azure.iot.device import Message
 # https://github.com/Azure/azure-iot-sdk-python/tree/main/samples
 
 ua_server_url = "opc.tcp://localhost:53530/OPCUA/SimulationServer"
-az_iothub_device_connstr = "HostName=gm-iot-hub.azure-devices.cn;DeviceId=gmdev1;SharedAccessKey=lxrscOIukFS8K9Im/AKp2yAu2fwUl7CYkPiX14TGEtU="
+az_iothub_device_connstr = "YOUR IOTHUB CONNECTION STRING"
 logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger("AzIoT OPCUA Edge")
 
