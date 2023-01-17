@@ -20,102 +20,214 @@
         <!-----Step 4: Add line-awesome support----->
         <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     </head>
-    <body>
-        <div id="main" class="flex">
-        <div id="content" class="flex flex-auto flex-col">
-        <h1 class="text-2xl">Azure IoT 设备遥测</h1>
-
-        <!--图表容器-->
-        <div id="charts" class="flex flex-auto w-full"></div>
-
-        <div>
-            <button id="testBtn">Data Test</button>
-        </div>
-
-        <div id="modalDialog" class="hidden fixed top-0 left-0 w-screen h-screen p-28 bg-neutral-900/75 transition duration-1000">
-            <div class="flex flex-col flex-auto p-2  bg-white rounded ">
-                <div class="flex border-b-2 border-gray-300">
-                    <span class="flex-auto">
-                        <h1 class="text-lg font-semibold ">Telemetries for data points</h1>
-                    </span>
-                    <span class="pr-1">
-                        <button id="telemetryCloseBtn" class="hover:bg-slate-100 p-1">
-                            <i class="las la-times la-lg"></i>
+    <body class="h-screen">
+        <header id="header" class="flex items-center border-b-2 border-gray-300 bg-sky-700 shadow">
+            <div id="logo" class="flex items-center px-2 py-2.5 text-white">
+                <i class="las la-code font-bold text-4xl"></i>
+                <span class="pl-2 pb-1.5 text-2xl">Azure IoT 动手实验营</span>
+            </div>
+            <div id="menu" class="flex flex-auto justify-end pr-8 text-white space-x-5">
+                <span><a href="https://github.com/hguomin/azure-iot-labs">实验手册</a></span>
+                <span><a href="https://github.com/hguomin/aziot-lab-iiot-e2c">代码仓库</a></span>
+            </div>
+            
+        </header>
+        <div id="main" class="relative flex py-0.5">
+            <div id="device-list" class="flex flex-col w-64 bg-sky-700 text-white rounded shadow px-1 mx-0.5 mb-0.5">
+                <div class="border-b-2 border-cyan-30 text-lg font-semibold px-1 pt-3 pb-1.5">设备列表</div>
+                <div class="px-2 pt-6">
+                    <ul class="divide-y divide-dashed">
+                        <li class="flex hover:bg-sky-600 rounded m-0.5">
+                            <button class="grow m-0.5 px-0.5 py-1.5 rounded text-left hover:font-semibold">设备1</button>
+                        </li>
+                        <li class="flex hover:bg-sky-600 rounded m-0.5">
+                            <button class="grow m-0.5 px-0.5 py-1.5 rounded text-left hover:font-semibold">设备2</button>
+                        </li>
+                        <li class="flex hover:bg-sky-600 rounded m-0.5">
+                            <button class="grow m-0.5 px-0.5 py-1.5 rounded text-left hover:font-semibold">设备3</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div id="content" class="flex flex-auto flex-col">
+                <div id="modules" class="flex flex-col h-40 rounded shadow-sm px-1 border-2">
+                    <div class="border-b-2 border-cyan-30 text-lg font-semibold px-1 pt-3 pb-1.5">应用&模块</div>
+                    <div class="flex-auto flex px-2 py-5 space-x-3 text-white">
+                        <ul class="flex space-x-3">
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm"><button>模块1</button></li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-700 rounded shadow-sm"><button>模块2</button></li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm"><button>模块3</button></li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm"><button>模块4</button></li>
+                        </ul>
+                        <button id="addModule" class="flex w-24 items-center justify-center bg-sky-600 rounded shadow-sm">
+                            <i class="las la-plus text-4xl"></i>
                         </button>
-                    </span>
+                    </div>
                 </div>
-                <div id="previewContainer" class="flex-auto p-2">
-                    <!--canvas id="telemetry-chart"></canvas-->
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <button id="tableUpdateBtn">Table Update</button>
-        </div>
-
-
-        <!----------Lab7: Edge module deployment---------->
-        <form id="edgeModuleDeploymentForm" class="flex flex-col p-2">
-            <div class="flex flex-col  mt-2">
-                <h2>Module Settings</h2>
-                <label for="imageUri" class="font-semibold pb-1.5 mt-2">Image URI: </label>
-                <input type="text" name="imageUri" class="p-1 border border-gray-400 outline-none" />
-                <label for="restartPolicy" class="font-semibold pb-1.5 mt-2">Restart Policy: </label>
-                <select name="restartPolicy" class="p-1 border border-gray-400 outline-none">
-                    <option value="always">Always</option>
-                    <option value="never">Never</option>
-                    <option value="on-failure">On Failure</option>
-                    <option value="on-unhealthy">On Unhealthy</option>
-                </select>
-                <label for="desiredStatus" class="font-semibold pb-1.5 mt-2">Desired Status:</label>
-                <select name="desiredStatus" class="p-1 border border-gray-400 outline-none">
-                    <option value="running">Running</option>
-                    <option value="stopped">Stopped</option>
-                </select>
-                <label for="imagePullPolicy" class="font-semibold pb-1.5 mt-2">Image Pull Policy:</label>
-                <select name="imagePullPolicy" class="p-1 border border-gray-400 outline-none">
-                    <option value="onCreate">On Create</option>
-                    <option value="never">Never</option>
-                </select>
-                <label for="startupOrder" class="font-semibold pb-1.5 mt-2">Startup Order:</label>
-                <input type="number" id="startupOrder" name="startupOrder" data-bind="order" class="p-1 border border-gray-400 outline-none" value="200" />
-            </div>
-            <div class="flex flex-col  mt-2">
-                <h2>Environment Variables(Seperated by ;)</h2>
-                <!--div class="flex">
-                    <span class="w-64">Name</span>
-                    <span class="w-64">Value</span>
+                <div id="controls" class="flex flex-col h-52 rounded shadow-sm px-1 m-0.5 border-2">
+                    <div class="border-b-2 border-cyan-30 text-lg font-semibold px-1 pt-3 pb-1.5">模块配置</div>
+                    <div class="flex-auto flex px-2 py-5 space-x-3 text-white">
+                        <ul class="flex space-x-3">
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块1</li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-700 rounded shadow-sm">模块2</li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块3</li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块4</li>
+                        </ul>
+                        <button class="flex w-24 items-center justify-center bg-sky-600 rounded shadow-sm">
+                            <i class="las la-plus text-4xl"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex">
-                    <input type="text" name="envName" class="w-64" />
-                    <input type="text" name="envValue" class="w-64"/>
-                </div-->
-                <textarea name="environmentVariables" class="p-1 border border-gray-400 outline-none"></textarea>
+                    <div id="status" class="flex-auto flex flex-col h-96 rounded shadow-sm px-1 m-0.5 border-2">
+                        <div class="flex border-b-2 border-cyan-30 text-lg font-semibold px-1 pt-3 pb-1.5">
+                            <span class="grow">遥测&数据</span>
+                            <button class="w-16 border-b-2 border-white hover:border-cyan-600 rounded-sm"><i class="las la-plus text-lg"></i></button>
+                        </div>
+                        <div class="flex-auto flex px-2 py-5 space-x-3 text-white">
+                            <ul class="flex space-x-3">
+                                <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块1</li>
+                                <li class="flex p-2 w-24 items-center justify-center bg-sky-700 rounded shadow-sm">模块2</li>
+                                <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块3</li>
+                                <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块4</li>
+                            </ul>
+                            <button class="flex w-24 items-center justify-center bg-sky-600 rounded shadow-sm">
+                                <i class="las la-plus text-4xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="status" class="flex flex-col h-96 rounded shadow-sm px-1 m-0.5 border-2">
+                        <div class="border-b-2 border-cyan-30 text-lg font-semibold px-1 pt-3 pb-1.5">状态监控</div>
+                        <div class="flex-auto flex px-2 py-5 space-x-3 text-white">
+                            <ul class="flex space-x-3">
+                                <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块1</li>
+                                <li class="flex p-2 w-24 items-center justify-center bg-sky-700 rounded shadow-sm">模块2</li>
+                                <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块3</li>
+                                <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块4</li>
+                            </ul>
+                            <button class="flex w-24 items-center justify-center bg-sky-600 rounded shadow-sm">
+                                <i class="las la-plus text-4xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="controls" class="flex flex-col h-52 rounded shadow-sm px-1 m-0.5 border-2">
+                    <div class="border-b-2 border-cyan-30 text-lg font-semibold px-1 pt-3 pb-1.5">控制面板</div>
+                    <div class="flex-auto flex px-2 py-5 space-x-3 text-white">
+                        <ul class="flex space-x-3">
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块1</li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-700 rounded shadow-sm">模块2</li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块3</li>
+                            <li class="flex p-2 w-24 items-center justify-center bg-sky-600 rounded shadow-sm">模块4</li>
+                        </ul>
+                        <button class="flex w-24 items-center justify-center bg-sky-600 rounded shadow-sm">
+                            <i class="las la-plus text-4xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div><!--content-->
+            <div id="side-panel-add" class="flex absolute h-full w-1/5 right-0 bg-slate-50 shadow-lg transition duration-1000">
+                side bar
             </div>
-            <div class="flex flex-col  mt-2">
-                <label for="containerOptions" class="font-semibold pb-1.5">Container Options:</label>
-                <textarea name="containerOptions" class="p-1 h-36 border border-gray-400 outline-none"></textarea>
-            </div>
-            <div class="flex flex-col  mt-2">
-                <label for="moduleTwin" class="font-semibold pb-1.5">Module Twins:</label>
-                <textarea name="moduleTwin" class="p-1 h-36 border border-gray-400 outline-none"></textarea>
-            </div>
+        </div><!--main-->
 
-            <div class="flex justify-end space-x-5 pr-2 p-2">
-                <button id="deployEdgeModuleBtn" type="submit">Submit</button>
-                <button id="cacelDeployEdgeModuleBtn" type="submit" class="w-28 py-1 border border-gray-600 bg-slate-800 text-white rounded-sm">Cancel</button>
-            </div>
-        </form>
 
+                <h1 class="text-2xl">Azure IoT 设备遥测</h1>
         
-        </div>
-        <div id="settings" class="flex flex-col w-72">
-            <label for="class" class="font-semibold pb-1.5 mt-2">Class: </label>
-            <input type="text" name="class" class="p-1 border border-gray-400 outline-none" />
-            <button class="w-28 py-1 border border-gray-600 bg-slate-800 text-white rounded-sm">OK</button>
-        </div>
-        </div>
+                <!--图表容器-->
+                <div id="charts" class="flex flex-auto w-full"></div>
+        
+                <div>
+                    <button id="testBtn">Data Test</button>
+                </div>
+        
+                <div id="modalDialog" class="hidden fixed top-0 left-0 w-screen h-screen p-10 bg-neutral-900/75 transition duration-1000">
+                    <div class="flex flex-col flex-auto p-2 bg-white rounded ">
+                        <div class="flex border-b-2 border-gray-300">
+                            <span class="flex-auto">
+                                <h1 class="text-lg font-semibold ">Telemetries for data points</h1>
+                            </span>
+                            <span class="pr-1">
+                                <button id="telemetryCloseBtn" class="hover:bg-slate-100 p-1">
+                                    <i class="las la-times la-lg"></i>
+                                </button>
+                            </span>
+                        </div>
+                        <div id="previewContainer" class="flex-auto p-2">
+                            <!--canvas id="telemetry-chart"></canvas-->
+                        </div>
+                    </div>
+                </div>
+        
+                <div>
+                    <button id="tableUpdateBtn">Table Update</button>
+                </div>
+        
+        
+                <!----------Lab7: Edge module deployment---------->
+                <form id="edgeModuleDeploymentForm" class="flex flex-col p-2">
+                    <div class="flex flex-col  mt-2">
+                        <h2>Module Settings</h2>
+                        <label for="imageUri" class="font-semibold pb-1.5 mt-2">Image URI: </label>
+                        <input type="text" name="imageUri" class="p-1 border border-gray-400 outline-none" />
+                        <label for="restartPolicy" class="font-semibold pb-1.5 mt-2">Restart Policy: </label>
+                        <select name="restartPolicy" class="p-1 border border-gray-400 outline-none">
+                            <option value="always">Always</option>
+                            <option value="never">Never</option>
+                            <option value="on-failure">On Failure</option>
+                            <option value="on-unhealthy">On Unhealthy</option>
+                        </select>
+                        <label for="desiredStatus" class="font-semibold pb-1.5 mt-2">Desired Status:</label>
+                        <select name="desiredStatus" class="p-1 border border-gray-400 outline-none">
+                            <option value="running">Running</option>
+                            <option value="stopped">Stopped</option>
+                        </select>
+                        <label for="imagePullPolicy" class="font-semibold pb-1.5 mt-2">Image Pull Policy:</label>
+                        <select name="imagePullPolicy" class="p-1 border border-gray-400 outline-none">
+                            <option value="onCreate">On Create</option>
+                            <option value="never">Never</option>
+                        </select>
+                        <label for="startupOrder" class="font-semibold pb-1.5 mt-2">Startup Order:</label>
+                        <input type="number" id="startupOrder" name="startupOrder" data-bind="order"
+                            class="p-1 border border-gray-400 outline-none" value="200" />
+                    </div>
+                    <div class="flex flex-col  mt-2">
+                        <h2>Environment Variables(Seperated by ;)</h2>
+                        <!--div class="flex">
+                            <span class="w-64">Name</span>
+                            <span class="w-64">Value</span>
+                        </div>
+                        <div class="flex">
+                            <input type="text" name="envName" class="w-64" />
+                            <input type="text" name="envValue" class="w-64"/>
+                        </div-->
+                        <textarea name="environmentVariables" class="p-1 border border-gray-400 outline-none"></textarea>
+                    </div>
+                    <div class="flex flex-col  mt-2">
+                        <label for="containerOptions" class="font-semibold pb-1.5">Container Options:</label>
+                        <textarea name="containerOptions" class="p-1 h-36 border border-gray-400 outline-none"></textarea>
+                    </div>
+                    <div class="flex flex-col  mt-2">
+                        <label for="moduleTwin" class="font-semibold pb-1.5">Module Twins:</label>
+                        <textarea name="moduleTwin" class="p-1 h-36 border border-gray-400 outline-none"></textarea>
+                    </div>
+        
+                    <div class="flex justify-end space-x-5 pr-2 p-2">
+                        <button id="deployEdgeModuleBtn" type="submit">Submit</button>
+                        <button id="cacelDeployEdgeModuleBtn" type="submit"
+                            class="w-28 py-1 border border-gray-600 bg-slate-800 text-white rounded-sm">Cancel</button>
+                    </div>
+                </form>
+        
+        
+            
+
+            <div id="settings" class="flex flex-col w-72 hidden">
+                <label for="class" class="font-semibold pb-1.5 mt-2">Class: </label>
+                <input type="text" name="class" class="p-1 border border-gray-400 outline-none" />
+                <button class="w-28 py-1 border border-gray-600 bg-slate-800 text-white rounded-sm">OK</button>
+            </div>
+        
 
         <!-----Step 4: Add tailwind css support----->
         <script src="https://cdn.tailwindcss.com"></script>  
@@ -123,6 +235,18 @@
         <!--script src="https://d3js.org/d3.v5.min.js"></script-->
         <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
         <script>
+
+            function displayModalDialog(show, content) {
+                let modalDialog = document.querySelector("#modalDialog");
+                if (show) {
+                    modalDialog.style.display = "flex";
+                    let preview = modalDialog.querySelector("#previewContainer");
+                    preview.innerHTML = content;
+                }
+                else {
+                    modalDialog.style.display = "none";
+                }
+            }
 
             var order = 100;
             const startupOrder = document.querySelector("#startupOrder");
@@ -144,6 +268,14 @@
                 containerOptions: "",
                 moduleTwin: "",
             };
+            const addModuleBtn = document.querySelector("#addModule");
+            addModuleBtn.addEventListener("click", e => {
+                e.preventDefault();
+                let edgeModuleDeploymentForm = document.querySelector("#edgeModuleDeploymentForm");
+
+                displayModalDialog(true, edgeModuleDeploymentForm.outerHTML)
+            });
+
             const deployEdgeModuleBtn = document.querySelector("#deployEdgeModuleBtn");
             deployEdgeModuleBtn.setAttribute("class", "w-28 py-1 border border-gray-600 bg-slate-800 text-white rounded-sm");
             deployEdgeModuleBtn.setAttribute("datax", "demo-datax");
