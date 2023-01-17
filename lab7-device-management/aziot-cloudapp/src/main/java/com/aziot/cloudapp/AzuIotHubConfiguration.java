@@ -13,7 +13,7 @@ import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 
 @Configuration
 public class AzuIotHubConfiguration {
-    private final String iothubConnectionString = "HostName=gm-dev-iothub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=5fFeCGRr6zN3OAWMSbTMjQE0rI0X9oBHxt6F5rdIKFI="; //"HostName=gm-iot-hub.azure-devices.cn;SharedAccessKeyName=iothubowner;SharedAccessKey=Xjr/VNg1kYwXHPct8JY24YYNtWHAu/QQDf/takH+57Q=";
+    private final String iothubConnectionString = "[YOUR IOT HUB CONNECTION STRING]";
 
     @Bean
     public IotHubConnectionString iotHubConnectionString() {
